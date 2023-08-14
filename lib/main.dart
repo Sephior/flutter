@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/task.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -62,6 +65,13 @@ class _MyHomePageState extends State<MyHomePage> {
   int modifyingIndex = 0;
   double percent = 0.0;
   
+  addTaskToServer(Task task) async {
+    final response = await http.post(
+      Uri.http('127.0.0.1:8000','/posting/addTask'),
+      headers: {'Content-type':'application/json'},
+      body: jsonEncode(task));
+    print("response is = ${response.body}");
+  }
   // 퍼센트 재설정 함수
   void updatePercent(){
     if (tasks.isEmpty){
@@ -125,8 +135,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             isModifying = false;
                           })
                           : setState((){
-                            var task = Task(_textController.text);
-                            tasks.add(task);
+                            var task = Task(id:0, work:_textController.text, isComplete: false);
+                            addTaskToServer(task);
                             _textController.clear();
                           });
                         }
