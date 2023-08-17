@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:http/http.dart' as http;
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -66,12 +67,30 @@ class _MyHomePageState extends State<MyHomePage> {
   double percent = 0.0;
   
   addTaskToServer(Task task) async {
+    // Post 방식
     final response = await http.post(
       Uri.http('127.0.0.1:8000','/posting/addTask'),
       headers: {'Content-type':'application/json'},
       body: jsonEncode(task));
     print("response is = ${response.body}");
+    getTasktoServer();
   }
+
+  getTasktoServer() async {
+    //get 방식
+    final response = await http.get(Uri.http('127.0.0.1:8000','/posting'));
+    String responseBody = utf8.decode(response.bodyBytes);
+    print(responseBody);
+    List<Task> list = json
+      .decode(responseBody)
+      .map<Task>((json) => Task.fromJson(json))
+      .toList();
+    print(list.length);
+    setState(() {
+      tasks = list;
+    });
+  }
+
   // 퍼센트 재설정 함수
   void updatePercent(){
     if (tasks.isEmpty){
@@ -85,6 +104,13 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     percent = completeTaskCnt/tasks.length;
     }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getTasktoServer();
   }
 
   @override
