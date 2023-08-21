@@ -91,6 +91,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  updateTasktoServer(int id, String work) async {
+    // update/id 정수/work 내용  의 url을 설정한다.
+    final response = await http.get(Uri.http('127.0.0.1:8000','/posting/update/$id/$work'));
+    getTasktoServer();
+    print(response.body);
+  }
+
+  removeTasktoServer(int id) async {
+    final response = await http.get(Uri.http('127.0.0.1:8000','posting/remove/$id'));
+    getTasktoServer();
+  }
+
   // 퍼센트 재설정 함수
   void updatePercent(){
     if (tasks.isEmpty){
@@ -154,8 +166,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           // isModifying 이 true이면 ? 이후의 코드가, false면 : 이후의 코드가 실행됨
                           isModifying
                           ? setState(() {
-                            tasks[modifyingIndex].work = _textController.text;
-                            tasks[modifyingIndex].isComplete = false;
+                            updateTasktoServer(tasks[modifyingIndex].id, _textController.text);
+                            //tasks[modifyingIndex].work = _textController.text;
+                            //tasks[modifyingIndex].isComplete = false;
                             _textController.clear();
                             modifyingIndex = 0;
                             isModifying = false;
@@ -231,9 +244,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         updatePercent();
                       });
                   }, child: const Text("revise"),),
+
                   TextButton(onPressed: (){
                     setState(() {
-                      tasks.remove(tasks[i]);
+                      removeTasktoServer(tasks[i].id);
                       updatePercent();
                     });
                   }, child: const Text("remove"),),
